@@ -1,0 +1,140 @@
+import tkinter as tk
+
+# Constants
+WIDTH = 600  # Updated width for side-by-side bars
+HEIGHT = 500  # Adjusted height to 500 pixels
+DECREASE_INTERVAL = 250  # Initial decrease interval in milliseconds
+INCREMENT_INTERVAL = 50  # Interval to increase decrease interval
+DECREASE_TIMER_STEP = 1  # Timer step to decrease bar heights
+MAX_BAR_HEIGHT = 250  # Maximum bar height before further adjustments
+HEIGHT_COUNTER_STEP = 2  # Decrease timer step after certain heights
+
+class BarGraphApp:
+    def __init__(self, root):
+        self.root = root
+        self.root.title("Bar Graph Demo")
+
+        # Initialize variables for like bar
+        self.like_bar_height = 0
+        self.like_counter = 0
+        self.decrease_timer_interval_like = DECREASE_INTERVAL
+
+        # Initialize variables for dislike bar
+        self.dislike_bar_height = 0
+        self.dislike_counter = 0
+        self.decrease_timer_interval_dislike = DECREASE_INTERVAL
+
+        # Create canvas for like and dislike bar graphs side by side
+        self.canvas = tk.Canvas(root, width=WIDTH, height=HEIGHT, bg="white")
+        self.canvas.pack()
+
+        # Create thumbs up and thumbs down buttons
+        self.like_button = tk.Button(root, text="👍", font=("Arial", 20), command=self.like)
+        self.dislike_button = tk.Button(root, text="👎", font=("Arial", 20), command=self.dislike)
+        self.like_button.pack(side="left")
+        self.dislike_button.pack(side="left")
+
+        # Create counters for like bar height and count
+        self.like_height_label = tk.Label(root, text=f"Like Bar Height: {self.like_bar_height}")
+        self.like_counter_label = tk.Label(root, text=f"Likes: {self.like_counter}")
+        self.like_height_label.pack()
+        self.like_counter_label.pack()
+
+        # Create counters for dislike bar height and count
+        self.dislike_height_label = tk.Label(root, text=f"Dislike Bar Height: {self.dislike_bar_height}")
+        self.dislike_counter_label = tk.Label(root, text=f"Dislikes: {self.dislike_counter}")
+        self.dislike_height_label.pack()
+        self.dislike_counter_label.pack()
+
+        # Start the timer for decreasing like and dislike bar heights
+        self.decrease_timer_like()
+        self.decrease_timer_dislike()
+
+    def like(self):
+        # Increase like bar height by 10 pixels
+        self.like_bar_height += 10
+        self.like_counter += 1
+        self.update_bar(self.like_bar_height, "green")
+        self.update_counter(self.like_counter_label, self.like_counter)
+        self.update_height_label(self.like_height_label, self.like_bar_height)
+
+    def dislike(self):
+        # Increase dislike bar height by 10 pixels
+        self.dislike_bar_height += 10
+        self.dislike_counter += 1
+        self.update_bar(self.dislike_bar_height, "red")
+        self.update_counter(self.dislike_counter_label, self.dislike_counter)
+        self.update_height_label(self.dislike_height_label, self.dislike_bar_height)
+
+    def update_bar(self, bar_height, color):
+        # Clear the canvas
+        self.canvas.delete(color)
+
+        # Draw the bar with the updated height and color
+        if color == "green":
+            self.canvas.create_rectangle(10, HEIGHT - bar_height, WIDTH // 2 - 10, HEIGHT - 10, fill=color, tag=color)
+        elif color == "red":
+            self.canvas.create_rectangle(WIDTH // 2 + 10, HEIGHT - bar_height, WIDTH - 10, HEIGHT - 10, fill=color, tag=color)
+
+    def update_counter(self, counter_label, counter_value):
+        # Update the counter label
+        counter_label.config(text=f"Likes: {counter_value}")
+
+    def update_height_label(self, height_label, bar_height):
+        # Update the height label
+        height_label.config(text=f"Bar Height: {bar_height}")
+
+    def decrease_timer_like(self):
+        # Decrease like bar height based on specific conditions
+        if self.like_bar_height >= MAX_BAR_HEIGHT:
+            self.decrease_timer_interval_like += INCREMENT_INTERVAL
+            self.like_bar_height -= 9
+        elif self.like_bar_height >= 200:
+            self.like_bar_height -= 7
+        elif self.like_bar_height >= 150:
+            self.like_bar_height -= 5
+        elif self.like_bar_height >= 100:
+            self.like_bar_height -= 3
+        elif self.like_bar_height >= 50:
+            self.like_bar_height -= 2
+        else:
+            self.like_bar_height = max(0, self.like_bar_height - 1)
+
+        self.update_bar(self.like_bar_height, "green")
+        self.update_height_label(self.like_height_label, self.like_bar_height)
+
+        # Adjust the decrease timer step if the height is past certain thresholds
+        if self.like_bar_height >= 50:
+            self.decrease_timer_interval_like = DECREASE_INTERVAL * HEIGHT_COUNTER_STEP
+
+        self.root.after(self.decrease_timer_interval_like, self.decrease_timer_like)
+
+    def decrease_timer_dislike(self):
+        # Decrease dislike bar height based on specific conditions
+        if self.dislike_bar_height >= MAX_BAR_HEIGHT:
+            self.decrease_timer_interval_dislike += INCREMENT_INTERVAL
+            self.dislike_bar_height -= 9
+        elif self.dislike_bar_height >= 200:
+            self.dislike_bar_height -= 7
+        elif self.dislike_bar_height >= 150:
+            self.dislike_bar_height -= 5
+        elif self.dislike_bar_height >= 100:
+            self.dislike_bar_height -= 3
+        elif self.dislike_bar_height >= 50:
+            self.dislike_bar_height -= 2
+        else:
+            self.dislike_bar_height = max(0, self.dislike_bar_height - 1)
+
+        self.update_bar(self.dislike_bar_height, "red")
+        self.update_height_label(self.dislike_height_label, self.dislike_bar_height)
+
+        # Adjust the decrease timer step if the height is past certain thresholds
+        if self.dislike_bar_height >= 50:
+            self.decrease_timer_interval_dislike = DECREASE_INTERVAL * HEIGHT_COUNTER_STEP
+
+        self.root.after(self.decrease_timer_interval_dislike, self.decrease_timer_dislike)
+
+if __name__ == "__main__":
+    root = tk.Tk()
+    app = BarGraphApp(root)
+    root.mainloop()
